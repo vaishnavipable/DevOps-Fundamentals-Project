@@ -1,0 +1,51 @@
+# Linux Log Monitoring & Troubleshooting Report
+
+**Project:** DevOps Fundamentals Project  
+**Server:** Ubuntu EC2 Instance  
+**Log files analyzed:** `/var/log/auth.log` and `/var/log/syslog`
+
+## 1. Failed Login Attempts
+
+**Command used:**
+`sudo grep -i "failed" /var/log/auth.log | tail -20`
+
+**Findings:**
+The command returned no matching entries containing "failed" in the current authentication log. This does not establish that no failed login attempts occurred outside the searched log entries or in rotated logs.
+
+## 2. SSH Login Activity
+
+**Command used:**
+`sudo grep -iE "Accepted|Failed|Invalid user" /var/log/auth.log | tail -20`
+
+**Findings:**
+The log contains multiple successful SSH public-key authentication entries for the `ubuntu` account. The displayed entries include activity on October 19, October 20, and October 21, 2026.
+
+No failed or invalid-user entries appeared in the displayed results. These findings describe the returned log entries only.
+
+## 3. System Errors
+
+**Command used:**
+`sudo grep -iE "error|critical|alert|emerg" /var/log/syslog | tail -20`
+
+**Findings:**
+- Repeated Amazon SSM Agent errors indicate that the instance could not obtain the required Systems Manager role credentials.
+- The logs include an `AccessDeniedException` stating that the Systems Manager instance management role is not configured for the AWS account.
+- `fwupd` logged messages indicating that `/sys/power/mem_sleep` could not be opened because the file was unavailable.
+
+These messages identify configuration or environment-related issues that may require further investigation.
+
+## 4. Warning Messages
+
+**Command used:**
+`sudo grep -i "warn" /var/log/syslog | tail -20`
+
+**Findings:**
+Repeated `EC2RoleProvider` warnings report that no EC2 instance profile role was found and that credentials could not be reported to AWS Systems Manager.
+
+**Recommended follow-up:** If Systems Manager access is required, review the EC2 instance's IAM role and Systems Manager configuration. The available log entries alone do not establish whether these messages affect the website or Apache service.
+
+## Conclusion
+
+Linux authentication and system logs were reviewed to identify SSH login activity, failed-login indicators, system errors, and warning messages. The reviewed authentication entries show successful public-key SSH logins, while the system logs contain recurring AWS Systems Manager credential and role configuration messages.
+
+This report summarizes the results observed in the selected log entries. Further investigation of rotated logs and relevant service status may be necessary for a complete historical assessment.
